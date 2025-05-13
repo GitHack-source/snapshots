@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.4</version>
+    <template_groups>
+        <template_group>
+            <uuid>18be1d25892247b2b3866593e9967ad0</uuid>
+            <name>Custom Templates</name>
+        </template_group>
+        <template_group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
+            <name>Templates</name>
+        </template_group>
+        <template_group>
+            <uuid>36bff6c29af64692839d077febfc7079</uuid>
+            <name>Templates/Network devices</name>
+        </template_group>
+    </template_groups>
+    <templates>
+        <template>
+            <uuid>ca906c00363e41da9cc1a96ebd215e43</uuid>
+            <template>Switch SNMP Trap</template>
+            <name>Switch SNMP Trap</name>
+            <groups>
+                <group>
+                    <name>Custom Templates</name>
+                </group>
+                <group>
+                    <name>Templates</name>
+                </group>
+                <group>
+                    <name>Templates/Network devices</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <uuid>d566f6f9507849359e05d7d38212efce</uuid>
+                    <name>Container opener</name>
+                    <type>TRAP</type>
+                    <key>opener</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <value_type>TEXT</value_type>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <uuid>9f34eef8705849d9a2436d417a876ed7</uuid>
+                    <name>Network interface discover</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFDESCR},1.3.6.1.2.1.2.2.1.2]</snmp_oid>
+                    <key>net.if.discover</key>
+                    <delay>1h</delay>
+                    <lifetime>1h</lifetime>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>168598d2e0e94eeda77ff21000b57db8</uuid>
+                            <name>{#IFDESCR} ifAdminStatus trap</name>
+                            <type>SNMP_TRAP</type>
+                            <key>snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*fIndex\.\d+ = {#SNMPINDEX}$&quot;]</key>
+                            <delay>0</delay>
+                            <valuemap>
+                                <name>IF-MIB::ifOperStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>REGEX</type>
+                                    <parameters>
+                                        <parameter>IF-MIB::ifAdminStatus\.\d+\s*=\s*(\d|up|down|lowerLayerDown)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>up</parameter>
+                                        <parameter>1</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>down</parameter>
+                                        <parameter>2</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>7</parameter>
+                                        <parameter>2</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>lowerLayerDown</parameter>
+                                        <parameter>2</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <uuid>263243809b7748c3931cace0ddf99ac4</uuid>
+                            <name>{#IFDESCR} ifOperStatus trap</name>
+                            <type>SNMP_TRAP</type>
+                            <key>snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;]</key>
+                            <delay>0</delay>
+                            <valuemap>
+                                <name>IF-MIB::ifOperStatus</name>
+                            </valuemap>
+                            <preprocessing>
+                                <step>
+                                    <type>REGEX</type>
+                                    <parameters>
+                                        <parameter>IF-MIB::ifOperStatus\.\d+\s*=\s*(\d|up|down|lowerLayerDown)</parameter>
+                                        <parameter>\1</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>up</parameter>
+                                        <parameter>1</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>down</parameter>
+                                        <parameter>2</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>lowerLayerDown</parameter>
+                                        <parameter>2</parameter>
+                                    </parameters>
+                                </step>
+                                <step>
+                                    <type>STR_REPLACE</type>
+                                    <parameters>
+                                        <parameter>7</parameter>
+                                        <parameter>2</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <uuid>586e4b6f92be4276ae78f27a89bec161</uuid>
+                            <expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=2 and last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*fIndex\.\d+ = {#SNMPINDEX}$&quot;])=1 and {#IFALIAS}=&quot;DPL&quot;</expression>
+                            <name>Interface {#IFDESCR}: DPL Link DOWN 🦍🦍🦍</name>
+                            <priority>HIGH</priority>
+                            <manual_close>YES</manual_close>
+                            <dependencies>
+                                <dependency>
+                                    <name>Interface {#IFDESCR}: DPL Opened</name>
+                                    <expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=2 and last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*fIndex\.\d+ = {#SNMPINDEX}$&quot;])=1 and {#IFALIAS}=&quot;DPL&quot; and nodata(/Switch SNMP Trap/opener,1m)=0</expression>
+                                    <recovery_expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=1</recovery_expression>
+                                </dependency>
+                            </dependencies>
+                            <tags>
+                                <tag>
+                                    <tag>target</tag>
+                                    <value>DPL</value>
+                                </tag>
+                            </tags>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <uuid>ef69e3abdec7426c9ba6e35edfe0636f</uuid>
+                            <expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=2 and last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*fIndex\.\d+ = {#SNMPINDEX}$&quot;])=1 and {#IFALIAS}=&quot;DPL&quot; and nodata(/Switch SNMP Trap/opener,1m)=0</expression>
+                            <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                            <recovery_expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=1</recovery_expression>
+                            <name>Interface {#IFDESCR}: DPL Opened</name>
+                            <event_name>Interface {#IFDESCR}: DPL {ITEM.LASTVALUE3}</event_name>
+                            <priority>INFO</priority>
+                            <manual_close>YES</manual_close>
+                            <tags>
+                                <tag>
+                                    <tag>target</tag>
+                                    <value>DPL</value>
+                                </tag>
+                            </tags>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <uuid>ad807ae9c0c14c6ab663dbbe288a0f1f</uuid>
+                            <expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=2 and last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*fIndex\.\d+ = {#SNMPINDEX}$&quot;])=1 and nodata(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;],1m)=0</expression>
+                            <name>Interface {#IFDESCR}: Link down</name>
+                            <status>DISABLED</status>
+                            <priority>HIGH</priority>
+                            <manual_close>YES</manual_close>
+                            <dependencies>
+                                <dependency>
+                                    <name>Interface {#IFDESCR}: DPL Opened</name>
+                                    <expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=2 and last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*fIndex\.\d+ = {#SNMPINDEX}$&quot;])=1 and {#IFALIAS}=&quot;DPL&quot; and nodata(/Switch SNMP Trap/opener,1m)=0</expression>
+                                    <recovery_expression>last(/Switch SNMP Trap/snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;])=1</recovery_expression>
+                                </dependency>
+                            </dependencies>
+                            <tags>
+                                <tag>
+                                    <tag>target</tag>
+                                    <value>DPL</value>
+                                </tag>
+                            </tags>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <uuid>7c451b22705d4dfc89ad09c753d9d0be</uuid>
+                            <name>ifOperStatus change</name>
+                            <show_work_period>NO</show_work_period>
+                            <graph_items>
+                                <graph_item>
+                                    <drawtype>DOTTED_LINE</drawtype>
+                                    <color>1A7C11</color>
+                                    <calc_fnc>ALL</calc_fnc>
+                                    <item>
+                                        <host>Switch SNMP Trap</host>
+                                        <key>snmptrap[&quot;.*(linkDown|linkUp)[\s\S]*ifIndex\.\d+ = {#SNMPINDEX}$&quot;]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$SNMP_COMMUNITY}</macro>
+                    <value>ipswitch</value>
+                </macro>
+            </macros>
+            <valuemaps>
+                <valuemap>
+                    <uuid>529f4e3b7ac04a2ab839ea53a52980e5</uuid>
+                    <name>IF-MIB::ifOperStatus</name>
+                    <mappings>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>Up</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>Down</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+            </valuemaps>
+        </template>
+    </templates>
+</zabbix_export>
