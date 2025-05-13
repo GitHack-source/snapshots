@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.4</version>
+    <template_groups>
+        <template_group>
+            <uuid>18be1d25892247b2b3866593e9967ad0</uuid>
+            <name>Custom Templates</name>
+        </template_group>
+        <template_group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
+            <name>Templates</name>
+        </template_group>
+    </template_groups>
+    <templates>
+        <template>
+            <uuid>c350172e9cf0498fa8a0e28b6eb49197</uuid>
+            <template>Log monitoring by Zabbix agent active</template>
+            <name>Log monitoring by Zabbix agent active</name>
+            <groups>
+                <group>
+                    <name>Custom Templates</name>
+                </group>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <discovery_rules>
+                <discovery_rule>
+                    <uuid>52ae510537f4475e998b168810d6b7d1</uuid>
+                    <name>Log files dicovery</name>
+                    <key>vfs.file.contents[{$LOGDIR}]</key>
+                    <delay>1d</delay>
+                    <lifetime>1h</lifetime>
+                    <description>Бере необхідні файли, що потрібно моніторити з /etc/zabbix/logfiles.txt, щоб змінити шлях, змініть макро {$LOGDIR}</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>1d3badc4b18c41348428447f2a19f61d</uuid>
+                            <name>Log: {#FILEPATH}</name>
+                            <type>ZABBIX_ACTIVE</type>
+                            <key>log[{#FILEPATH},{$LOGREGEX},,,skip]</key>
+                            <trends>0</trends>
+                            <value_type>LOG</value_type>
+                            <tags>
+                                <tag>
+                                    <tag>component</tag>
+                                    <value>logs</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>5c41c8d010244a65a8cd10e00ce56602</uuid>
+                                    <expression>nodata(/Log monitoring by Zabbix agent active/log[{#FILEPATH},{$LOGREGEX},,,skip],1h)=0 and
+{$TG_NOTIFY_ONLY}=&quot;yes&quot;</expression>
+                                    <name>Info: {$LOGREGEX} found in {#FILEPATH}</name>
+                                    <opdata>{ITEM.LASTVALUE}</opdata>
+                                    <priority>INFO</priority>
+                                    <manual_close>YES</manual_close>
+                                    <tags>
+                                        <tag>
+                                            <tag>send_to</tag>
+                                            <value>programmers</value>
+                                        </tag>
+                                        <tag>
+                                            <tag>target</tag>
+                                            <value>unimportant</value>
+                                        </tag>
+                                    </tags>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <uuid>41f246414dcd488fb6ec472e47256c2c</uuid>
+                                    <expression>nodata(/Log monitoring by Zabbix agent active/log[{#FILEPATH},{$LOGREGEX},,,skip],1h)=0</expression>
+                                    <name>{$LOGREGEX} found in {#FILEPATH}</name>
+                                    <opdata>{ITEM.LASTVALUE}</opdata>
+                                    <priority>HIGH</priority>
+                                    <manual_close>YES</manual_close>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Info: {$LOGREGEX} found in {#FILEPATH}</name>
+                                            <expression>nodata(/Log monitoring by Zabbix agent active/log[{#FILEPATH},{$LOGREGEX},,,skip],1h)=0 and
+{$TG_NOTIFY_ONLY}=&quot;yes&quot;</expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <preprocessing>
+                        <step>
+                            <type>JAVASCRIPT</type>
+                            <parameters>
+                                <parameter>var output = [];
+var filePaths = value.split(&quot;\n&quot;).filter(function (path) {
+  return path.trim() !== &quot;&quot;;
+});
+for (var i = 0; i &lt; filePaths.length; i++) {
+  var filePath = filePaths[i];
+  var obj = {};
+  obj[&quot;{#FILEPATH}&quot;] = filePath;
+  output.push(obj);
+}
+return JSON.stringify(output, null, 2);</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$LOGDIR}</macro>
+                    <value>/etc/zabbix/logfiles.txt</value>
+                    <description>Файл на сервері з якого береться список логів для моніторингу</description>
+                </macro>
+                <macro>
+                    <macro>{$LOGREGEX}</macro>
+                    <value>(?i)traceback</value>
+                    <description>Regex по якому фільтруються логи</description>
+                </macro>
+                <macro>
+                    <macro>{$TG_NOTIFY_ONLY}</macro>
+                    <value>no</value>
+                    <description>yes/no</description>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>

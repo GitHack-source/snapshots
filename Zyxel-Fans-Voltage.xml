@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>6.4</version>
+    <template_groups>
+        <template_group>
+            <uuid>18be1d25892247b2b3866593e9967ad0</uuid>
+            <name>Custom Templates</name>
+        </template_group>
+        <template_group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
+            <name>Templates</name>
+        </template_group>
+        <template_group>
+            <uuid>36bff6c29af64692839d077febfc7079</uuid>
+            <name>Templates/Network devices</name>
+        </template_group>
+    </template_groups>
+    <templates>
+        <template>
+            <uuid>b0e7d9b62b4e40e2a9af3a207350a5fa</uuid>
+            <template>Zyxel ES Fans and Voltage by SNMP</template>
+            <name>Zyxel ES Fans and Voltage by SNMP</name>
+            <groups>
+                <group>
+                    <name>Custom Templates</name>
+                </group>
+                <group>
+                    <name>Templates</name>
+                </group>
+                <group>
+                    <name>Templates/Network devices</name>
+                </group>
+            </groups>
+            <items>
+                <item>
+                    <uuid>8255f601773f4827837b9f0096ef88cc</uuid>
+                    <name>Voltage trap</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap[&quot;890\.1\.5\.8\.45\.27\.2&quot;]</key>
+                    <delay>0</delay>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>TEXT</value_type>
+                    <preprocessing>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>890\.1\.5\.8\.45\.27\.2\.(\d)</parameter>
+                                <parameter>\1</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>STR_REPLACE</type>
+                            <parameters>
+                                <parameter>1</parameter>
+                                <parameter>problem</parameter>
+                            </parameters>
+                        </step>
+                        <step>
+                            <type>REGEX</type>
+                            <parameters>
+                                <parameter>2</parameter>
+                                <parameter>clear</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <uuid>3545f301c7964d408df9a2c8b9c3082c</uuid>
+                            <expression>last(/Zyxel ES Fans and Voltage by SNMP/snmptrap[&quot;890\.1\.5\.8\.45\.27\.2&quot;])&lt;&gt;&quot;clear&quot; and nodata(/Zyxel ES Fans and Voltage by SNMP/snmptrap[&quot;890\.1\.5\.8\.45\.27\.2&quot;],1m)=0</expression>
+                            <name>Voltage out of range</name>
+                            <status>DISABLED</status>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <uuid>784e71ff94b84e52b6bc2f6718a8538b</uuid>
+                    <name>Fans discovery</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#FAN_STATUS},1.3.6.1.4.1.890.1.5.8.12.9.1.1.6]</snmp_oid>
+                    <key>zyxel.fans.discovery</key>
+                    <delay>1d</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>c857f8b6cfff4b999b82ccfe77e49faf</uuid>
+                            <name>Fan {#SNMPINDEX} status</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.4.1.890.1.5.8.12.9.1.1.6.{#SNMPINDEX}</snmp_oid>
+                            <key>zyxel.fans.status[{#SNMPINDEX}]</key>
+                            <delay>8h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>9d1689f4df4c4eda8d26212c84d5ed28</uuid>
+                                    <expression>find(/Zyxel ES Fans and Voltage by SNMP/zyxel.fans.status[{#SNMPINDEX}],#1,&quot;iregexp&quot;,&quot;normal&quot;)=0</expression>
+                                    <name>Fan {#SNMPINDEX} status not normal</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <uuid>61a03df17f8f4e3daa09c7ae54420289</uuid>
+                    <name>Voltage Discovery</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#VOLTAGE_STATUS},1.3.6.1.4.1.890.1.5.8.12.9.3.1.7]</snmp_oid>
+                    <key>zyxel.voltage.discovery</key>
+                    <delay>1d</delay>
+                    <filter>
+                        <conditions>
+                            <condition>
+                                <macro>{#VOLTAGE_STATUS}</macro>
+                                <value>.*(?i)absent.*</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>A</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>25b683e427f04981a8fffd4ee55383f3</uuid>
+                            <name>Voltage {#SNMPINDEX} status</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.4.1.890.1.5.8.12.9.3.1.7.{#SNMPINDEX}</snmp_oid>
+                            <key>zyxel.voltage.status[{#SNMPINDEX}]</key>
+                            <delay>8h</delay>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>018a776032cf41a6a4ec16552e89a389</uuid>
+                                    <expression>find(/Zyxel ES Fans and Voltage by SNMP/zyxel.voltage.status[{#SNMPINDEX}],#1,&quot;iregexp&quot;,&quot;(normal|absent)&quot;)=0</expression>
+                                    <name>Voltage {#SNMPINDEX} status is not Normal</name>
+                                    <priority>WARNING</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+</zabbix_export>
